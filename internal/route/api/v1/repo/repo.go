@@ -206,16 +206,19 @@ func CreateOrgRepo(c *context.APIContext, opt api.CreateRepoOption) {
 
 // pmopmo
 func Fork(c *context.APIContext, f form.CreateRepo) {
-	//db.ForkRepository(doer, owner *User, baseRepo *Repository, name, desc string)
-	ctxUser := c.User
+
 	// baseRepo is source
 	// need to get that from context
 	baseRepo, err := db.GetRepositoryByID(c.ParamsInt64(":repoid"))
 	if err != nil {
 		c.NotFoundOrError(err, "get repository by ID")
-		return
+		c.JSON(http.StatusNotFound, map[string]interface{}{
+			"ok":    false,
+			"error": err.Error(),
+		})
 	}
-	repo, err := db.ForkRepository(c.User, ctxUser, baseRepo, f.RepoName, f.Description)
+
+	repo, err := db.ForkRepository(c.User, c.User, baseRepo, baseRepo.Name, baseRepo.Description)
 	c.JSONSuccess(&repo)
 }
 
