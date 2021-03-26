@@ -204,6 +204,21 @@ func CreateOrgRepo(c *context.APIContext, opt api.CreateRepoOption) {
 	CreateUserRepo(c, org, opt)
 }
 
+// pmopmo
+func Fork(c *context.APIContext, f form.CreateRepo) {
+	//db.ForkRepository(doer, owner *User, baseRepo *Repository, name, desc string)
+	ctxUser := c.User
+	// baseRepo is source
+	// need to get that from context
+	baseRepo, err := db.GetRepositoryByID(c.ParamsInt64(":repoid"))
+	if err != nil {
+		c.NotFoundOrError(err, "get repository by ID")
+		return
+	}
+	repo, err := db.ForkRepository(c.User, ctxUser, baseRepo, f.RepoName, f.Description)
+	c.JSONSuccess(&repo)
+}
+
 func Migrate(c *context.APIContext, f form.MigrateRepo) {
 	ctxUser := c.User
 	// Not equal means context user is an organization,
